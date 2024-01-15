@@ -7,7 +7,7 @@ import sys
 os.environ["MUJOCO_GL"] = "osmesa"
 
 import numpy as np
-import ruamel.yaml as yaml
+import yaml
 
 sys.path.append(str(pathlib.Path(__file__).parent))
 

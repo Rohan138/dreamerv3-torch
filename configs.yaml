@@ -123,7 +123,7 @@ crafter:
   units: 1024
   encoder: {mlp_keys: '$^', cnn_keys: 'image', cnn_depth: 96, mlp_layers: 5, mlp_units: 1024}
   decoder: {mlp_keys: '$^', cnn_keys: 'image', cnn_depth: 96, mlp_layers: 5, mlp_units: 1024}
-  actor: {layers: 5, dist: 'onehot'}
+  actor: {layers: 5, dist: 'onehot', std: 'none'}
   value: {layers: 5}
   reward_head: {layers: 5}
   cont_head: {layers: 5}
@@ -136,7 +136,7 @@ atari100k:
   train_ratio: 1024
   video_pred_log: true
   eval_episode_num: 100
-  actor: {dist: 'onehot'}
+  actor: {dist: 'onehot', std: 'none'}
   imag_gradient: 'reinforce'
   stickey: False
   lives: unused
@@ -161,7 +161,7 @@ minecraft:
   units: 1024
   encoder: {mlp_keys: 'inventory|inventory_max|equipped|health|hunger|breath|obs_reward', cnn_keys: 'image', cnn_depth: 96, mlp_layers: 5, mlp_units: 1024}
   decoder: {mlp_keys: 'inventory|inventory_max|equipped|health|hunger|breath', cnn_keys: 'image', cnn_depth: 96, mlp_layers: 5, mlp_units: 1024}
-  actor: {layers: 5, dist: 'onehot'}
+  actor: {layers: 5, dist: 'onehot', std: 'none'}
   value: {layers: 5}
   reward_head: {layers: 5}
   cont_head: {layers: 5}
@@ -172,7 +172,7 @@ minecraft:
 memorymaze:
   steps: 1e8
   action_repeat: 2
-  actor: {dist: 'onehot'}
+  actor: {dist: 'onehot', std: 'none'}
   imag_gradient: 'reinforce'
   task: 'memorymaze_9x9'
 

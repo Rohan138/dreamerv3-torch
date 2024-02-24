@@ -38,7 +38,6 @@ class Atari:
             from PIL import Image
 
             self._image = Image
-        import gym.envs.atari
 
         if name == "james_bond":
             name = "jamesbond"
@@ -51,8 +50,8 @@ class Atari:
         self._length = length
         self._random = np.random.RandomState(seed)
         with self.LOCK:
-            self._env = gym.envs.atari.AtariEnv(
-                game=name,
+            self._env = gym.make(
+                name,
                 obs_type="image",
                 frameskip=1,
                 repeat_action_probability=0.25 if sticky else 0.0,
@@ -94,12 +93,12 @@ class Atari:
         if len(action.shape) >= 1:
             action = np.argmax(action)
         for repeat in range(self._repeat):
-            _, reward, over, info = self._env.step(action)
+            _, reward, term, trunc, info = self._env.step(action)
             self._step += 1
             total += reward
             if repeat == self._repeat - 2:
                 self._screen(self._buffer[1])
-            if over:
+            if term or trunc:
                 break
             if self._lives != "unused":
                 current = self._ale.lives()
@@ -110,19 +109,19 @@ class Atari:
         if not self._repeat:
             self._buffer[1][:] = self._buffer[0][:]
         self._screen(self._buffer[0])
-        self._done = over or (self._length and self._step >= self._length)
+        self._done = term or trunc or (self._length and self._step >= self._length)
         return self._obs(
             total,
-            is_last=self._done or (dead and self._lives == "reset"),
-            is_terminal=dead or over,
+            is_last=trunc or term or (dead and self._lives == "reset"),
+            is_terminal=dead or term,
         )
 
     def reset(self):
         self._env.reset()
         if self._noops:
             for _ in range(self._random.randint(self._noops)):
-                _, _, dead, _ = self._env.step(0)
-                if dead:
+                _, _, term, trunc, _ = self._env.step(0)
+                if term or trunc:
                     self._env.reset()
         self._last_lives = self._ale.lives()
         self._screen(self._buffer[0])

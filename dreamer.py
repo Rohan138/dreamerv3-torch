@@ -3,6 +3,7 @@ import functools
 import os
 import pathlib
 import sys
+import time
 
 os.environ["MUJOCO_GL"] = "osmesa"
 
@@ -193,6 +194,11 @@ def make_env(config, mode, id):
 
         env = minecraft.make_env(task, size=config.size, break_speed=config.break_speed)
         env = wrappers.OneHotAction(env)
+    elif suite == "cartpole":
+        import envs.cartpole as cartpole
+
+        env = cartpole.CartPoleEnv()
+        env = wrappers.OneHotAction(env)
     else:
         raise NotImplementedError(suite)
     env = wrappers.TimeLimit(env, config.time_limit)
@@ -303,6 +309,7 @@ def main(config):
         logger.write()
         if config.eval_episode_num > 0:
             print("Start evaluation.")
+            start_time = time.time()
             eval_policy = functools.partial(agent, training=False)
             tools.simulate(
                 eval_policy,
@@ -316,7 +323,10 @@ def main(config):
             if config.video_pred_log:
                 video_pred = agent._wm.video_pred(next(eval_dataset))
                 logger.video("eval_openl", to_np(video_pred))
+            print(f"Evaluation time: {time.time() - start_time:.2f} sec")
+            logger.scalar("eval_time", time.time() - start_time)
         print("Start training.")
+        start_time = time.time()
         state = tools.simulate(
             agent,
             train_envs,
@@ -332,6 +342,7 @@ def main(config):
             "optims_state_dict": tools.recursively_collect_optim_state_dict(agent),
         }
         torch.save(items_to_save, logdir / "latest.pt")
+        print(f"Training time: {time.time() - start_time:.2f} sec")
     for env in train_envs + eval_envs:
         try:
             env.close()
